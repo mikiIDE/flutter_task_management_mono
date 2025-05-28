@@ -1,0 +1,21 @@
+name: task_management_mono
+
+packages:
+  - apps/**
+  - packages/**
+
+command:
+  bootstrap:
+    runPubGetInParallel: false
+
+scripts:
+  get:
+    run: flutter pub get
+    exec:
+      concurrency: 1
+
+  analyze:
+    run: flutter analyze
+
+  test:
+    run: flutter test
