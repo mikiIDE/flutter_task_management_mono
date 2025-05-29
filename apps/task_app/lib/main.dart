@@ -87,7 +87,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
           _repository.addTask(Task(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             title: 'テストタスク',
-            description: '動的に追加されたタスク',
+            description: 'プラスボタンで動的に追加されたタスク',
           ));
           setState(() {});
         },
