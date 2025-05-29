@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: task_data,ui_components
+dependency_overrides:
+  task_data:
+    path: ../../packages/task_data
+  ui_components:
+    path: ../../packages/ui_components
