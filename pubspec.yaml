@@ -1,0 +1,8 @@
+name: task_management_mono
+description: Task management monorepo
+
+environment:
+  sdk: ^3.7.2
+
+dev_dependencies:
+  melos: ^6.3.2
