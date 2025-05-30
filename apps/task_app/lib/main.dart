@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
 // 🎯 ここが重要！Melosのローカルパッケージimport
 import 'package:task_data/task_data.dart';
+
+// 正しいimport方法（src/ではなくパッケージ名で）
+import 'package:ui_components/ui_components.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,16 +39,12 @@ class _TaskTestPageState extends State<TaskTestPage> {
   void initState() {
     super.initState();
     // テスト用のタスクを追加
-    _repository.addTask(Task(
-      id: '1',
-      title: 'Melosテスト',
-      description: 'パッケージ間連携のテスト',
-    ));
-    _repository.addTask(Task(
-      id: '2',
-      title: 'Flutter学習',
-      description: 'Udemy講座の続き',
-    ));
+    _repository.addTask(
+      Task(id: '1', title: 'Melosテスト', description: 'パッケージ間連携のテスト'),
+    );
+    _repository.addTask(
+      Task(id: '2', title: 'Flutter学習', description: 'Udemy講座の続き'),
+    );
   }
 
   @override
@@ -70,12 +70,10 @@ class _TaskTestPageState extends State<TaskTestPage> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 final task = tasks[index];
-                return ListTile(
-                  title: Text(task.title),
-                  subtitle: Text(task.description),
-                  trailing: Icon(
-                    task.isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                  ),
+                return TaskCard(
+                  title: task.title,
+                  description: task.description,
+                  isCompleted: task.isCompleted,
                 );
               },
             ),
@@ -84,11 +82,13 @@ class _TaskTestPageState extends State<TaskTestPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _repository.addTask(Task(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            title: 'テストタスク',
-            description: 'プラスボタンで動的に追加されたタスク',
-          ));
+          _repository.addTask(
+            Task(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              title: 'テストタスク',
+              description: 'プラスボタンで動的に追加されたタスク',
+            ),
+          );
           setState(() {});
         },
         child: const Icon(Icons.add),

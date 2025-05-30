@@ -1,4 +1,4 @@
-// UI components library for task management app
+// ui_componentsという名前のライブラリとして設定するよ、という宣言
 library ui_components;
 
 // 公開するウィジェットをexportで明示
