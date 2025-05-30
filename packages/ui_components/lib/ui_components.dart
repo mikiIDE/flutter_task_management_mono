@@ -1,5 +1,5 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+// UI components library for task management app
+library ui_components;
+
+// 公開するウィジェットをexportで明示
+export 'src/widgets/task_card.dart';
