@@ -82,14 +82,22 @@ class _TaskTestPageState extends State<TaskTestPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _repository.addTask(
-            Task(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              title: 'テストタスク',
-              description: 'プラスボタンで動的に追加されたタスク',
-            ),
+          showDialog(
+            context: context,
+            builder:
+                (context) => TaskForm( // TaskFormへ変更
+                  onSubmit: (title, description) {
+                    _repository.addTask(
+                      Task(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        title: title,
+                        description: description,
+                      ),
+                    );
+                    setState(() {}); // 画面を更新
+                  },
+                ),
           );
-          setState(() {});
         },
         child: const Icon(Icons.add),
       ),
