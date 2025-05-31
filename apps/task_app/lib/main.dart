@@ -85,9 +85,36 @@ class _TaskTestPageState extends State<TaskTestPage> {
                       size: 30,
                     ),
                   ),
-                  onDismissed: (direction) {
-                    _repository.deleteTask(task.id);
-                    setState(() {}); // 画面を更新
+                  onDismissed: (direction) async {
+                    // 確認ダイアログを追加
+                    final bool? shouldDelete = await showDialog<bool>(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text("タスクを削除"),
+                            content: Text("「${task.title}」を削除しますか？"),
+                            actions: [
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(false),
+                                child: const Text("キャンセル"),
+                              ),
+                              TextButton(
+                                onPressed:
+                                    () => Navigator.of(context).pop(true),
+                                child: const Text(
+                                  "削除",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                    );
+
+                    if (shouldDelete == true) {
+                      _repository.deleteTask(task.id);
+                      setState(() {}); // 画面を更新
+                    }
                   },
                   child: TaskCard(
                     title: task.title,
