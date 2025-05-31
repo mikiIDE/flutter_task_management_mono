@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  provider: ^6.1.1 # 状態管理のため追加
   # ↓が重要！ローカルパッケージへの依存関係
   task_data:
     path: ../../packages/task_data

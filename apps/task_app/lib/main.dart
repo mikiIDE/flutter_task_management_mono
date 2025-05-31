@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-
-// 🎯 ここが重要！Melosのローカルパッケージimport
-import 'package:task_data/task_data.dart';
-
-// 正しいimport方法（src/ではなくパッケージ名で）
-import 'package:ui_components/ui_components.dart';
+import 'package:task_data/task_data.dart'; // 🎯 ここが重要！Melosのローカルパッケージimport
+import 'package:ui_components/ui_components.dart'; // 正しいimport方法（src/ではなくパッケージ名で）
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -173,7 +170,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
 }
 
 class TaskStatsPage extends StatelessWidget {
-  final TaskRepository _repository = TaskRepository(); // 新しいRepository
+  final TaskRepository _repository = TaskRepository(); // 新しいインスタンス
 
   TaskStatsPage({super.key});
 
