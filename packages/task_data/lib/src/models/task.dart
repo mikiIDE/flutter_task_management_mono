@@ -13,6 +13,7 @@ class Task {
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
+  // 一部だけ変更した新しいTaskを作成する（新しい値がなければ元の値を使う）
   Task copyWith({
     String? id,
     String? title,
@@ -29,6 +30,7 @@ class Task {
     );
   }
 
+  // デバッグ用
   @override
   String toString() {
     return 'Task(id: $id, title: $title, completed: $isCompleted)';

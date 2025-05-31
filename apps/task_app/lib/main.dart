@@ -74,6 +74,12 @@ class _TaskTestPageState extends State<TaskTestPage> {
                   title: task.title,
                   description: task.description,
                   isCompleted: task.isCompleted,
+                  onTap: (){
+                    _repository.toggleTaskCompletion(task.id);
+                    setState(() {
+                    //   画面を更新
+                    });
+                  },
                 );
               },
             ),

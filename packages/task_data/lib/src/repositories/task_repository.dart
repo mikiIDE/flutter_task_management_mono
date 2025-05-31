@@ -21,4 +21,13 @@ class TaskRepository {
   void deleteTask(String taskId) {
     _tasks.removeWhere((task) => task.id == taskId);
   }
+
+  void toggleTaskCompletion(String taskId){
+    final index = _tasks.indexWhere((task) => task.id == taskId);
+    if(index != -1){
+      final task = _tasks[index];
+      final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
+      _tasks[index] = updatedTask;
+    }
+  }
 }
