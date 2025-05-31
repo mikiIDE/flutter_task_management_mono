@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart'; // 追加
 import '../models/task.dart';
 
-class TaskRepository {
+class TaskRepository extends ChangeNotifier { // TaskRepositoryにChangeNotifierを継承させる
   final List<Task> _tasks = [];
 
   List<Task> getAllTasks() {

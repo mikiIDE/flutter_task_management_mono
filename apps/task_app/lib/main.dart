@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:task_data/task_data.dart'; // 🎯 ここが重要！Melosのローカルパッケージimport
 import 'package:ui_components/ui_components.dart'; // 正しいimport方法（src/ではなくパッケージ名で）
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'; // データ永続化のため追加
 
 void main() {
   runApp(const MyApp());
@@ -12,12 +12,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Melos Task Management',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return ChangeNotifierProvider(
+      create: (context) => TaskRepository(),
+      child: MaterialApp(
+        title: 'Melos Task Management',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: const TaskTestPage(),
       ),
-      home: const TaskTestPage(),
     );
   }
 }
@@ -30,23 +33,27 @@ class TaskTestPage extends StatefulWidget {
 }
 
 class _TaskTestPageState extends State<TaskTestPage> {
-  final TaskRepository _repository = TaskRepository();
+  // final TaskRepository _repository = TaskRepository(); // 共有のTaskRepositoryを使うためコメントアウト
 
   @override
   void initState() {
     super.initState();
-    // テスト用のタスクを追加
-    _repository.addTask(
-      Task(id: '1', title: 'Melosテスト', description: 'パッケージ間連携のテスト'),
-    );
-    _repository.addTask(
-      Task(id: '2', title: 'Flutter学習', description: 'Udemy講座の続き'),
-    );
+    // initStateでは使えないので、WidgetsBinding.instance.addPostFrameCallbackを使う
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final repository = context.read<TaskRepository>();
+      repository.addTask(
+        Task(id: "1", title: "Melosテスト", description: "パッケージ間関連のテスト"),
+      );
+      repository.addTask(
+        Task(id: "2", title: "Flutter学習", description: "Udemy講座の続き"),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final tasks = _repository.getAllTasks();
+    final repository = context.read<TaskRepository>(); // ← ここで取得
+    final tasks = repository.getAllTasks(); // ← _repository を repository に変更
 
     return Scaffold(
       appBar: AppBar(
@@ -120,7 +127,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
                     );
 
                     if (shouldDelete == true) {
-                      _repository.deleteTask(task.id);
+                      repository.deleteTask(task.id);
                       setState(() {}); // 画面を更新
                       return true; // 削除実行
                     }
@@ -131,7 +138,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
                     description: task.description,
                     isCompleted: task.isCompleted,
                     onTap: () {
-                      _repository.toggleTaskCompletion(task.id);
+                      repository.toggleTaskCompletion(task.id);
                       setState(() {
                         //   画面を更新
                       });
@@ -151,7 +158,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
                 (context) => TaskForm(
                   // TaskFormへ変更
                   onSubmit: (title, description) {
-                    _repository.addTask(
+                    repository.addTask(
                       Task(
                         id: DateTime.now().millisecondsSinceEpoch.toString(),
                         title: title,
@@ -170,27 +177,29 @@ class _TaskTestPageState extends State<TaskTestPage> {
 }
 
 class TaskStatsPage extends StatelessWidget {
-  final TaskRepository _repository = TaskRepository(); // 新しいインスタンス
+  // final TaskRepository _repository = TaskRepository(); // 新しいインスタンス
 
   TaskStatsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final tasks = _repository.getAllTasks();
+    final repository = context.read<TaskRepository>(); // 共有のRepositoryを使用する
+    final tasks = repository.getAllTasks(); // ← _repositoryをrepositoryへ変更
     final completedTasks = tasks.where((task) => task.isCompleted).length;
     final totalTasks = tasks.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("タスク統計"),
-      ),
+      appBar: AppBar(title: const Text("タスク統計")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("総タスク数：$totalTasks", style: TextStyle(fontSize: 24),),
-            Text("完了済み：$completedTasks", style: TextStyle(fontSize: 24),),
-            Text("未完了：${totalTasks - completedTasks}", style: TextStyle(fontSize: 24),),
+            Text("総タスク数：$totalTasks", style: TextStyle(fontSize: 24)),
+            Text("完了済み：$completedTasks", style: TextStyle(fontSize: 24)),
+            Text(
+              "未完了：${totalTasks - completedTasks}",
+              style: TextStyle(fontSize: 24),
+            ),
           ],
         ),
       ),
