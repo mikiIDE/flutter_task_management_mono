@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => TaskRepository(),
       child: MaterialApp(
-        title: 'Melos Task Management',
+        title: 'Task Management App w/ Melos',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
@@ -58,7 +58,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Melos連携テスト'),
+        title: const Text('タスク管理'),
         actions: [
           IconButton(
             onPressed: () {
@@ -76,7 +76,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
-              'Melosパッケージ間連携成功！ 🎉',
+              '今日のタスク頑張るぞぃ！ 🎉',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -179,7 +179,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
 class TaskStatsPage extends StatelessWidget {
   // final TaskRepository _repository = TaskRepository(); // 新しいインスタンス
 
-  TaskStatsPage({super.key});
+  const TaskStatsPage({super.key}); // constはなくてもOK
 
   @override
   Widget build(BuildContext context) {
