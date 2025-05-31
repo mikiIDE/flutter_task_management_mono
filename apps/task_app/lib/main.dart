@@ -55,6 +55,17 @@ class _TaskTestPageState extends State<TaskTestPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Melos連携テスト'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TaskStatsPage()),
+              );
+            },
+            icon: const Icon(Icons.bar_chart),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -156,6 +167,35 @@ class _TaskTestPageState extends State<TaskTestPage> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class TaskStatsPage extends StatelessWidget {
+  final TaskRepository _repository = TaskRepository(); // 新しいRepository
+
+  TaskStatsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tasks = _repository.getAllTasks();
+    final completedTasks = tasks.where((task) => task.isCompleted).length;
+    final totalTasks = tasks.length;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("タスク統計"),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("総タスク数：$totalTasks", style: TextStyle(fontSize: 24),),
+            Text("完了済み：$completedTasks", style: TextStyle(fontSize: 24),),
+            Text("未完了：${totalTasks - completedTasks}", style: TextStyle(fontSize: 24),),
+          ],
+        ),
       ),
     );
   }
