@@ -85,7 +85,7 @@ class _TaskTestPageState extends State<TaskTestPage> {
                       size: 30,
                     ),
                   ),
-                  onDismissed: (direction) async {
+                  confirmDismiss: (direction) async {
                     // 確認ダイアログを追加
                     final bool? shouldDelete = await showDialog<bool>(
                       context: context,
@@ -114,7 +114,9 @@ class _TaskTestPageState extends State<TaskTestPage> {
                     if (shouldDelete == true) {
                       _repository.deleteTask(task.id);
                       setState(() {}); // 画面を更新
+                      return true; // 削除実行
                     }
+                    return false; // 削除キャンセル
                   },
                   child: TaskCard(
                     title: task.title,
