@@ -70,16 +70,36 @@ class _TaskTestPageState extends State<TaskTestPage> {
               itemCount: tasks.length,
               itemBuilder: (context, index) {
                 final task = tasks[index];
-                return TaskCard(
-                  title: task.title,
-                  description: task.description,
-                  isCompleted: task.isCompleted,
-                  onTap: (){
-                    _repository.toggleTaskCompletion(task.id);
-                    setState(() {
-                    //   画面を更新
-                    });
+                return Dismissible(
+                  key: Key(task.id),
+                  // 一意のキーが必要
+                  direction: DismissDirection.endToStart,
+                  // 右から左へのスワイプ
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                  onDismissed: (direction) {
+                    _repository.deleteTask(task.id);
+                    setState(() {}); // 画面を更新
                   },
+                  child: TaskCard(
+                    title: task.title,
+                    description: task.description,
+                    isCompleted: task.isCompleted,
+                    onTap: () {
+                      _repository.toggleTaskCompletion(task.id);
+                      setState(() {
+                        //   画面を更新
+                      });
+                    },
+                  ),
                 );
               },
             ),
@@ -91,7 +111,8 @@ class _TaskTestPageState extends State<TaskTestPage> {
           showDialog(
             context: context,
             builder:
-                (context) => TaskForm( // TaskFormへ変更
+                (context) => TaskForm(
+                  // TaskFormへ変更
                   onSubmit: (title, description) {
                     _repository.addTask(
                       Task(
