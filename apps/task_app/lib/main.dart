@@ -34,26 +34,43 @@ class TaskTestPage extends StatefulWidget {
 
 class _TaskTestPageState extends State<TaskTestPage> {
   // final TaskRepository _repository = TaskRepository(); // 共有のTaskRepositoryを使うためコメントアウト
+  bool _isLoading = true; // ローディング状態を管理
 
   @override
   void initState() {
     super.initState();
-    // initStateでは使えないので、WidgetsBinding.instance.addPostFrameCallbackを使う
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final repository = context.read<TaskRepository>();
+    //   起動時にデータを読み込む
+    _loadInitialData();
+  }
+
+  // 初期データ読み込み処理
+  Future<void> _loadInitialData() async {
+    final repository = context.read<TaskRepository>();
+
+    //   保存されたタスクを読み込み
+    await repository.loadTasks();
+
+    // もしタスクが何もなければ、サンプルタスクを追加
+    if (repository.getAllTasks().isEmpty) {
       repository.addTask(
         Task(id: "1", title: "Melosテスト", description: "パッケージ間関連のテスト"),
       );
       repository.addTask(
         Task(id: "2", title: "Flutter学習", description: "Udemy講座の続き"),
       );
+    }
+
+    //   ローディング完了
+    setState(() {
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     // final repository = context.read<TaskRepository>(); // ← context.readは１度だけ取得
-    final repository = context.watch<TaskRepository>(); // ← context.watchはデータの変更を自動再取得してくれる
+    final repository =
+        context.watch<TaskRepository>(); // ← context.watchはデータの変更を自動再取得してくれる
     final tasks = repository.getAllTasks(); // ← _repository を repository に変更
 
     return Scaffold(
@@ -72,85 +89,96 @@ class _TaskTestPageState extends State<TaskTestPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              '今日のタスク頑張るぞぃ！ 🎉',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-                return Dismissible(
-                  key: Key(task.id),
-                  // 一意のキーが必要
-                  direction: DismissDirection.endToStart,
-                  // 右から左へのスワイプ
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 30,
+      body:
+          _isLoading
+              ? const Center(
+                child: CircularProgressIndicator(), // ローディング中の表示
+              )
+              : Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      '今日のタスク頑張るぞぃ！ 🎉',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  confirmDismiss: (direction) async {
-                    // 確認ダイアログを追加
-                    final bool? shouldDelete = await showDialog<bool>(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text("タスクを削除"),
-                            content: Text("「${task.title}」を削除しますか？"),
-                            actions: [
-                              TextButton(
-                                onPressed:
-                                    () => Navigator.of(context).pop(false),
-                                child: const Text("キャンセル"),
-                              ),
-                              TextButton(
-                                onPressed:
-                                    () => Navigator.of(context).pop(true),
-                                child: const Text(
-                                  "削除",
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+                        return Dismissible(
+                          key: Key(task.id),
+                          // 一意のキーが必要
+                          direction: DismissDirection.endToStart,
+                          // 右から左へのスワイプ
+                          background: Container(
+                            color: Colors.red,
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            child: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                              size: 30,
+                            ),
                           ),
-                    );
+                          confirmDismiss: (direction) async {
+                            // 確認ダイアログを追加
+                            final bool? shouldDelete = await showDialog<bool>(
+                              context: context,
+                              builder:
+                                  (context) => AlertDialog(
+                                    title: const Text("タスクを削除"),
+                                    content: Text("「${task.title}」を削除しますか？"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed:
+                                            () => Navigator.of(
+                                              context,
+                                            ).pop(false),
+                                        child: const Text("キャンセル"),
+                                      ),
+                                      TextButton(
+                                        onPressed:
+                                            () =>
+                                                Navigator.of(context).pop(true),
+                                        child: const Text(
+                                          "削除",
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                            );
 
-                    if (shouldDelete == true) {
-                      repository.deleteTask(task.id);
-                      setState(() {}); // 画面を更新
-                      return true; // 削除実行
-                    }
-                    return false; // 削除キャンセル
-                  },
-                  child: TaskCard(
-                    title: task.title,
-                    description: task.description,
-                    isCompleted: task.isCompleted,
-                    onTap: () {
-                      repository.toggleTaskCompletion(task.id);
-                      setState(() {
-                        //   画面を更新
-                      });
-                    },
+                            if (shouldDelete == true) {
+                              repository.deleteTask(task.id);
+                              setState(() {}); // 画面を更新
+                              return true; // 削除実行
+                            }
+                            return false; // 削除キャンセル
+                          },
+                          child: TaskCard(
+                            title: task.title,
+                            description: task.description,
+                            isCompleted: task.isCompleted,
+                            onTap: () {
+                              repository.toggleTaskCompletion(task.id);
+                              setState(() {
+                                //   画面を更新
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ],
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showDialog(
