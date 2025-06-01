@@ -52,7 +52,8 @@ class _TaskTestPageState extends State<TaskTestPage> {
 
   @override
   Widget build(BuildContext context) {
-    final repository = context.read<TaskRepository>(); // ← ここで取得
+    // final repository = context.read<TaskRepository>(); // ← context.readは１度だけ取得
+    final repository = context.watch<TaskRepository>(); // ← context.watchはデータの変更を自動再取得してくれる
     final tasks = repository.getAllTasks(); // ← _repository を repository に変更
 
     return Scaffold(
