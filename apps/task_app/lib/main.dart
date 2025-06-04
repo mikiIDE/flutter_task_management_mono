@@ -1,10 +1,12 @@
+// apps/task_app/lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:task_data/task_data.dart'; // 🎯 ここが重要！Melosのローカルパッケージimport
 import 'package:ui_components/ui_components.dart'; // 正しいimport方法（src/ではなくパッケージ名で）
-import 'package:provider/provider.dart'; // データ永続化のため追加
+// import 'package:provider/provider.dart'; // データ永続化のため追加
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -12,15 +14,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => TaskRepository(),
-      child: MaterialApp(
-        title: 'Task Management App w/ Melos',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        ),
-        home: const TaskTestPage(),
+    return MaterialApp(
+      title: 'Task Management App w/ Melos',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
+      home: const TaskTestPage(),
     );
   }
 }

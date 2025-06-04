@@ -79,3 +79,8 @@ class TaskRepository extends AsyncNotifier<List<Task>> {
     _saveTasks(); // 完了切替時に保存
   }
 }
+
+// TaskRepositoryを全体で使えるようにするProvider（RiverPodのProvider）
+final taskRepositoryProvider = AsyncNotifierProvider<TaskRepository, List<Task>>(
+  () => TaskRepository(),
+);
