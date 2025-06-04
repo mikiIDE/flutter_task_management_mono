@@ -1,34 +1,32 @@
+// packages/task_data/lib/src/repositories/task_repository.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // 追加
 import 'dart:convert'; // JSON変換用
 import '../models/task.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TaskRepository extends ChangeNotifier { // TaskRepositoryにChangeNotifierを継承させる
-  final List<Task> _tasks = [];
+class TaskRepository extends AsyncNotifier<List<Task>> {
+  // 状態管理をProvider→RiverPodに変更
+  // final List<Task> _tasks = []; //state操作に変更のためコメントアウト
   static const String _tasksKey = "tasks"; // 保存用のキー
 
-  List<Task> getAllTasks() {
-    return List.unmodifiable(_tasks);
-  }
-
-
-  // 🆕 アプリ起動時にデータを読み込む
-  Future<void> loadTasks() async {
+  @override
+  Future<List<Task>> build() async {
+    // 🆕 アプリ起動時にデータを読み込む
     try {
       final prefs = await SharedPreferences.getInstance();
       final tasksJsonString = prefs.getString(_tasksKey);
-
       if (tasksJsonString != null) {
         final List<dynamic> tasksJsonList = json.decode(tasksJsonString);
-        _tasks.clear();
-        _tasks.addAll(
-          tasksJsonList.map((taskJson) => Task.fromJson(taskJson)).toList(),
-        );
-        notifyListeners();
+        return tasksJsonList
+            .map((taskJson) => Task.fromJson(taskJson))
+            .toList();
       }
+      return []; // データがない場合は空リストを返す
     } catch (e) {
       print('タスクの読み込みでエラーが発生しました: $e');
+      return []; // エラーが発生した場合も空リストを返す
     }
   }
 
@@ -36,7 +34,10 @@ class TaskRepository extends ChangeNotifier { // TaskRepositoryにChangeNotifier
   Future<void> _saveTasks() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final tasksJsonList = _tasks.map((task) => task.toJson()).toList();
+      final tasksJsonList =
+          state.value!
+              .map((task) => task.toJson())
+              .toList(); // stateに変更、非同期処理のため!を使用
       final tasksJsonString = json.encode(tasksJsonList);
       await prefs.setString(_tasksKey, tasksJsonString);
     } catch (e) {
@@ -44,36 +45,37 @@ class TaskRepository extends ChangeNotifier { // TaskRepositoryにChangeNotifier
     }
   }
 
-
   void addTask(Task task) {
-    _tasks.add(task);
+    // RiverPodが自動処理するためnotifyListeners()は削除
+    state = AsyncValue.data(
+      [...state.value!, task], // state.value!：現在のタスクリスト、task：新しいタスクを末尾に追加
+    );
     _saveTasks(); // 追加時に保存
-    notifyListeners(); // 変更を知らせるため追加
   }
 
   void updateTask(Task updatedTask) {
-    final index = _tasks.indexWhere((task) => task.id == updatedTask.id);
-    if (index != -1) {
-      _tasks[index] = updatedTask;
-      _saveTasks(); // 更新時に保存
-      notifyListeners(); // 変更を知らせるため追加
-    }
+    state = AsyncValue.data(
+      state.value!
+          .map((task) => task.id == updatedTask.id ? updatedTask : task)
+          .toList(),
+    );
+    _saveTasks(); // 更新時に保存
   }
 
   void deleteTask(String taskId) {
-    _tasks.removeWhere((task) => task.id == taskId);
+    state = AsyncValue.data(
+      state.value!.where((task) => task.id != taskId).toList(),
+    );
     _saveTasks(); // 削除時に保存
-    notifyListeners(); // 変更を知らせるため追加
   }
 
-  void toggleTaskCompletion(String taskId){
-    final index = _tasks.indexWhere((task) => task.id == taskId);
-    if(index != -1){
-      final task = _tasks[index];
-      final updatedTask = task.copyWith(isCompleted: !task.isCompleted);
-      _tasks[index] = updatedTask;
-      _saveTasks(); // 完了切替時に保存
-      notifyListeners(); // 変更を知らせるため追加
-    }
+  void toggleTaskCompletion(String taskId) {
+    state = AsyncValue.data(
+      state.value!
+          .map((task) =>
+              task.id == taskId ? task.copyWith(isCompleted: !task.isCompleted) : task)
+          .toList(),
+    );
+    _saveTasks(); // 完了切替時に保存
   }
 }
